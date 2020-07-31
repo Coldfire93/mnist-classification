@@ -102,8 +102,9 @@ def test(args, model, device, test_loader):
     correct = 0
     with torch.no_grad():
         for data, target in test_loader:
+            data = data.view(-1, 28 * 28)
             data, target = data.to(device), target.to(device)
-            output = model(data)
+            output = model(data)[0]
             test_loss += loss_func(output, target).item()  # sum up batch loss
             pred = output.argmax(1, keepdim=True)  # get the index of the max log-probability
             correct += pred.eq(target.view_as(pred)).sum().item()
@@ -121,7 +122,7 @@ federated_train_loader, test_loader = load_data()
 
 # <--Create Neural Network model instance
 model = LogisticRegression().to(device)
-optimizer = optim.Adam(model.parameters(), lr=args.lr)  # <--TODO momentum is not supported at the moment
+optimizer = optim.SGD(model.parameters(), lr=args.lr)  # <--TODO momentum is not supported at the moment
 loss_func = nn.CrossEntropyLoss()
 
 # <--Train Neural network and validate with test set after completion of training every epoch
